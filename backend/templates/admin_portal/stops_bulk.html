@@ -1,0 +1,10 @@
+{% extends 'admin_portal/base.html' %}{% load static %}
+{% block actions %}<a class="btn btn-outline-secondary" href="{% url 'admin_portal:detail' 'routes' route.pk %}">Back to route</a><a class="btn btn-outline-secondary" href="{% url 'admin_portal:route-import' route.pk %}">Import stops from CSV</a>{% endblock %}
+{% block content %}<section class="panel"><div class="panel-heading"><div><h2>Enter stops in travel order</h2><p>Each stop needs its name, latitude and longitude. These stops will be appended after the {{ existing_count }} existing stops. Nothing is saved until you submit all stops.</p></div></div>
+<form method="post" class="record-form" data-record-form id="bulk-stop-form">{% csrf_token %}{{ formset.management_form }}
+{% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}{% if formset.non_form_errors %}<div class="alert alert-danger" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+<div id="bulk-stop-rows">{% for row in formset %}{% include 'admin_portal/stop_row.html' %}{% endfor %}</div>
+<button type="button" class="btn btn-outline-secondary" id="add-stop-row">+ Add another stop</button><p id="bulk-stop-feedback" class="form-text" role="status"></p>
+<div class="form-footer"><span>Stops are saved together in the order shown.</span><button type="submit" class="btn btn-primary">Save all stops</button></div>
+</form><template id="empty-stop-row">{% include 'admin_portal/stop_row.html' with row=formset.empty_form %}</template></section>{% endblock %}
+{% block scripts %}<script src="{% static 'js/route-stops.js' %}" defer></script>{% endblock %}

@@ -64,6 +64,32 @@ GPS accepted=201, identical retry=200, invalid=400, unauthorized trip=404/403, c
 Legacy `/api/buses/` and `/api/trips/` retain role-scoped querysets. New Android code uses dedicated driver APIs. `/api/development/trips/start/` and `/api/development/trips/{id}/location/` are gated development simulation endpoints, always disabled in production.
 # Route location suggestions
 
+## General route CSV import
+
+Administrators can upload a single route with 2–500 ordered stops using
+`POST /api/admin/routes/import/` (multipart `file`, `direction`, optional
+`route_code`, optional `route_name`). Route IDs can be inferred from CSV columns
+`route_id` / `route_code`. An explicitly supplied `route_code` overrides the
+source CSV ID, so source R001 can be copied into destination R003. Original
+source IDs remain in stop metadata. For backward compatibility only, the REST collection
+endpoint defaults to R001 when neither a form code nor CSV route ID is present.
+The website requires a code in this situation rather than selecting one silently.
+
+`POST /api/admin/routes/{id}/import-stops/` replaces the selected route's stops;
+the selected route is the destination even if the CSV has a different source ID.
+Original source IDs are retained as metadata. The website exposes the equivalent form
+at `/portal/routes/{id}/import/`. Manual batch entry is at
+`/portal/routes/{id}/stops/bulk/` and appends stops in entered order.
+
+Stop names and coordinates are persisted in BusStop and the order in RouteStop.
+All changes are atomic; invalid coordinates, duplicate stops, mixed CSV route
+IDs, active trips, and orphaned student pickup assignments are rejected. A bus's
+active driver assignment determines its route. A student's bus and pickup-stop
+assignment determines the route and GPS they can access. Existing driver GPS
+endpoints and student polling endpoints are unchanged.
+
+## Location suggestions
+
 `GET /api/admin/places/?q=Bengaluru` requires an active administrator account
 (the admin portal's session or an existing bearer token). It returns
 `{"results": ["place, city, state, country"]}` with at most six place names.

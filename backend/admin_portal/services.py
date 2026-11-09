@@ -241,3 +241,47 @@ def import_r001(rows, direction):
         RouteStop.objects.create(route=route, stop=stop, stop_order=row['order'])
     validate_route_pickups(route)
     return route
+
+
+@mutation
+def import_route_stops(rows, direction, route_code, route_name='', target=None):
+    route = Route.objects.get(pk=target.pk) if target else Route.objects.filter(route_code=route_code).first()
+    if route is None:
+        route = Route(route_code=route_code, route_name=route_name or route_code, is_active=True)
+    else:
+        no_active_trip(route=route)
+    if route_name:
+        route.route_name = route_name
+    route.start_location, route.destination = rows[0]['name'], rows[-1]['name']
+    route.direction, route.geometry = direction, {}
+    route.full_clean()
+    route.save()
+    ids = []
+    for row in rows:
+        stop, _ = BusStop.objects.update_or_create(
+            name=row['name'], latitude=row['latitude'], longitude=row['longitude'],
+            defaults={'address': row['address'], 'original_metadata': row['metadata']})
+        ids.append(stop.pk)
+    replace_order(route, ids)
+    validate_route_pickups(route)
+    return route
+
+
+@mutation
+def append_route_stops(route, rows):
+    route = Route.objects.get(pk=route.pk)
+    no_active_trip(route=route)
+    ids = list(route.route_stops.values_list('stop_id', flat=True))
+    if not rows or len(rows) + len(ids) > 500:
+        raise ValidationError('Add at least one stop. A route supports up to 500 stops.')
+    for row in rows:
+        stop, _ = BusStop.objects.get_or_create(
+            name=row['name'], latitude=row['latitude'], longitude=row['longitude'],
+            defaults={'address': row.get('address', '')})
+        if stop.pk in ids:
+            raise ValidationError('A stop with the same name and coordinates is already included in this route.')
+        ids.append(stop.pk)
+    replace_order(route, ids)
+    route.geometry = {}
+    route.save(update_fields=['geometry'])
+    return route

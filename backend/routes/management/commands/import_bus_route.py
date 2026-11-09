@@ -14,7 +14,7 @@ ALIASES = {
 }
 
 
-def read_stops(path):
+def read_stops(path, *, strict=True, route_code=None):
     """Validate the entire source before any database mutation. Extra columns survive."""
     try:
         with Path(path).open(encoding='utf-8-sig', newline='') as source:
@@ -45,8 +45,11 @@ def read_stops(path):
                     if order < 1:
                         raise ValueError('Order must be positive')
                     for route_column in ('route_code', 'route_id'):
-                        if route_column in lookup and raw[lookup[route_column]].strip() != 'R001':
-                            raise ValueError('Only route R001 is accepted')
+                        if route_column in lookup:
+                            supplied_code = raw[lookup[route_column]].strip()
+                            expected_code = 'R001' if strict else route_code
+                            if expected_code and supplied_code != expected_code:
+                                raise ValueError(f'Only route {expected_code} is accepted')
                 except (ValueError, InvalidOperation) as exc:
                     raise CommandError(f'Line {line}: invalid stop order, name or coordinates ({exc}).') from exc
                 rows.append({'name': values['name'], 'latitude': lat.quantize(Decimal('.0000001'), rounding=ROUND_HALF_UP),
@@ -55,12 +58,21 @@ def read_stops(path):
                              'metadata': raw})
     except (OSError, UnicodeError, csv.Error) as exc:
         raise CommandError(f'Cannot read CSV: {exc}') from exc
-    if len(rows) != 21 or sorted(r['order'] for r in rows) != list(range(1, 22)):
+    if strict and (len(rows) != 21 or sorted(r['order'] for r in rows) != list(range(1, 22))):
         raise CommandError('R001 requires exactly 21 stops, with unique consecutive stop_order values 1–21.')
+    if not strict:
+        if not 2 <= len(rows) <= 500:
+            raise CommandError('A route CSV must contain between 2 and 500 stops.')
+        if sorted(r['order'] for r in rows) != list(range(1, len(rows) + 1)):
+            raise CommandError('Stop order must be unique and consecutive, starting at 1.')
+        codes = {raw[key].strip() for raw in (row['metadata'] for row in rows)
+                 for key in raw if key.strip().lower().replace(' ', '_') in ('route_id', 'route_code')}
+        if len(codes) > 1 or '' in codes:
+            raise CommandError('Upload one route per CSV, with the same nonempty route_id or route_code on every row.')
     rows.sort(key=lambda row: row['order'])
-    if rows[0]['name'].casefold() != 'nie golden jubilee' or rows[-1]['name'].casefold() != 'north campus last stop':
+    if strict and (rows[0]['name'].casefold() != 'nie golden jubilee' or rows[-1]['name'].casefold() != 'north campus last stop'):
         raise CommandError('R001 must start at NIE Golden Jubilee and end at North Campus Last Stop.')
-    if len({(r['name'], r['latitude'], r['longitude']) for r in rows}) != 21:
+    if len({(r['name'], r['latitude'], r['longitude']) for r in rows}) != len(rows):
         raise CommandError('Duplicate named stop coordinates in CSV.')
     return rows
 

@@ -1,4 +1,43 @@
-# R001 source data and geometry
+# Routes, stops and CSV imports
+
+## Admin workflow
+
+Routes support multiple ordered stops with verified latitude/longitude. No schema
+migration is needed: the existing Route, BusStop and RouteStop tables store them.
+
+1. For manual entry, create a route under **Routes & stops**, open it and choose
+   **Add multiple stops**. Add rows in travel order and choose **Save all stops**.
+   Batches are appended after existing stops; use the existing reorder controls
+   to insert/rearrange them. A batch supports 200 rows and a route up to 500 stops.
+2. Alternatively choose **Import route CSV** from the routes list. Enter a route
+   code or let the file's `route_id` / `route_code` identify it. An explicitly
+   entered code overrides the CSV source ID: for example, source R001 can be
+   copied to R003 while retaining R001 in the original metadata. Enter an optional
+   route name and select direction. A file contains one route and 2–500 stops.
+3. Required columns: `stop_order` (also `stop_order_shared`, `sequence`, `order`),
+   `name` (also `stop_name`), `latitude` (also `lat`), and `longitude` (also `lon`,
+   `lng`). Order must run consecutively from 1. Extra columns are retained in the
+   database as original metadata. The supplied 21-stop CSV is accepted unchanged.
+4. **Import CSV** on a route's detail page uses that route as the destination, even when the CSV source ID differs. Original source IDs are preserved in metadata. Imports replace
+   its stops atomically, derive start/destination from the first/last stop, and clear
+   old road geometry. Reimporting identical data does not duplicate stops. Active
+   trips and changes that would orphan student pickup assignments block import.
+5. Assign a **driver + bus + route** in Assignments. Then assign each **student +
+   bus + pickup stop**. The selected bus determines the student's route; the stop
+   must belong to it. Students see only their assigned bus's route and GPS.
+6. The driver signs into the Android app, grants precise location, enables GPS,
+   and taps **Start trip**. Actual phone fixes update the existing driver GPS API,
+   admin fleet map and assigned student's tracking map. Merely creating a route
+   does not start GPS or fabricate a moving bus.
+
+CSV upload is limited to 2 MB. Coordinates are validated before any writes; invalid
+files and conflicts roll back the whole import. No live routes are imported by
+the development/test workflow.
+
+## Legacy R001 command-line profile
+
+The command-line `import_bus_route` command retains its strict 21-stop R001
+profile below. The admin website and REST uploads use the general workflow above.
 
 The authoritative `bus_route_stops.csv` is not included in this checkout and R001 was absent in Supabase at the Phase 6 audit. Supply the mentor/college's real file. Do not copy automated synthetic coordinates into production.
 

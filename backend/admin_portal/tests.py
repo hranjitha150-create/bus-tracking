@@ -235,7 +235,7 @@ class AdminPortalTests(TestCase):
 
     def test_csv_web_import_feedback(self):
         StudentBusAssignment.objects.update(is_active=False)
-        response = self.client.post('/portal/routes/import/', {'file': csv_upload(), 'direction': 'TO_COLLEGE'}, follow=True)
+        response = self.client.post('/portal/routes/import/', {'file': csv_upload(), 'direction': 'TO_COLLEGE', 'route_code': 'R001'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '21 ordered stops')
 

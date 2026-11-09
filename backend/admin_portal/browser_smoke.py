@@ -78,6 +78,32 @@ def main():
             page.get_by_role('button', name='Save changes').click()
             page.wait_for_url('**/portal/buses/*/')
             page.get_by_role('heading', name='BROWSER-03', exact=True).wait_for()
+            # Create a separate route, add several stops, then replace from its CSV.
+            page.goto('http://127.0.0.1:8002/portal/routes/add/')
+            page.fill('#id_route_code', 'BROWSER-R2')
+            page.fill('#id_route_name', 'Browser multi-stop route')
+            page.fill('#id_start_location', 'Town')
+            page.fill('#id_destination', 'College')
+            page.select_option('#id_direction', 'TO_COLLEGE')
+            page.get_by_role('button', name='Save changes').click()
+            page.wait_for_url('**/portal/routes/*/')
+            page.get_by_role('link', name='Add multiple stops', exact=False).click()
+            for index in (0, 1):
+                page.fill(f'#id_stops-{index}-name', f'Browser stop {index + 1}')
+                page.fill(f'#id_stops-{index}-latitude', f'10.{index + 1}')
+                page.fill(f'#id_stops-{index}-longitude', f'70.{index + 1}')
+            page.get_by_role('button', name='Add another stop').click()
+            assert page.locator('#id_stops-2-name').count() == 1
+            page.locator('[data-stop-row]').nth(2).get_by_role('button', name='Remove this stop').click()
+            page.get_by_role('button', name='Save all stops').click()
+            page.wait_for_url('**/portal/routes/*/')
+            page.get_by_text('2 ordered stops', exact=True).wait_for()
+            page.get_by_role('link', name='Import CSV', exact=True).click()
+            csv_bytes = b'route_id,stop_order_shared,stop_name,latitude,longitude\nBROWSER-R2,1,Town stop,10.1,70.1\nBROWSER-R2,2,Middle stop,10.2,70.2\nBROWSER-R2,3,College stop,10.3,70.3\n'
+            page.set_input_files('#id_file', {'name': 'route.csv', 'mimeType': 'text/csv', 'buffer': csv_bytes})
+            page.get_by_role('button', name='Validate & import').click()
+            page.wait_for_url('**/portal/routes/*/')
+            page.get_by_text('3 ordered stops', exact=True).wait_for()
             # Dynamic pickup loading and a successful reassignment.
             page.goto('http://127.0.0.1:8002/portal/assignments/student/add/')
             page.select_option('#id_student', str(fixture.student.pk))

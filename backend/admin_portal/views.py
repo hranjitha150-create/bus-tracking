@@ -17,7 +17,7 @@ from drivers.models import Driver
 from students.models import Student
 from routes.models import Route, BusStop, RouteStop
 from . import forms, services, queries
-from .uploads import import_upload
+from .uploads import import_upload, import_route_upload
 
 ENTITIES = {
     'buses': (Bus, 'Buses', forms.BusForm), 'drivers': (Driver, 'Drivers', forms.PersonForm),
@@ -189,7 +189,8 @@ def assignments(request):
 def assignment_edit(request, kind):
     if kind not in ('student', 'driver'):
         raise Http404
-    form = (forms.StudentAssignmentForm if kind == 'student' else forms.DriverAssignmentForm)(request.POST or None)
+    initial = {'route': request.GET.get('route')} if kind == 'driver' else {}
+    form = (forms.StudentAssignmentForm if kind == 'student' else forms.DriverAssignmentForm)(request.POST or None, initial=initial)
     if request.method == 'POST' and form.is_valid():
         try:
             (services.assign_student if kind == 'student' else services.assign_driver)(**form.cleaned_data)
@@ -281,19 +282,45 @@ def stop_remove(request, route_pk, pk):
 
 
 @admin_required
-def import_route(request):
-    form = forms.ImportForm(request.POST or None, request.FILES or None)
+def import_route(request, route_pk=None):
+    target = get_object_or_404(Route, pk=route_pk) if route_pk else None
+    initial = {'route_code': target.route_code, 'route_name': target.route_name, 'direction': target.direction} if target else {}
+    form = forms.ImportForm(request.POST or None, request.FILES or None, initial=initial)
+    if target:
+        form.fields['route_code'].disabled = True
+        form.fields['route_code'].help_text = 'This is the destination route. CSV stops will replace its stop list even if the CSV has a different source route ID. Original source IDs are retained as metadata.'
     if request.method == 'POST' and form.is_valid():
         try:
-            route = import_upload(form.cleaned_data['file'], form.cleaned_data['direction'])
+            route = import_route_upload(form.cleaned_data['file'], form.cleaned_data['direction'],
+                form.cleaned_data['route_code'], form.cleaned_data['route_name'], target=target)
         except (ValidationError, IntegrityError) as exc:
             error_on(form, exc)
         else:
-            messages.success(request, 'R001 imported: 21 ordered stops. Observations and uncertain names remain provisional.')
+            messages.success(request, f'{route.route_code} imported: {route.route_stops.count()} ordered stops. Source metadata retained.')
             return redirect('admin_portal:detail', entity='routes', pk=route.pk)
-    return render(request, 'admin_portal/form.html', {'form': form, 'title': 'Import R001 route', 'section': 'routes',
-        'intro': 'Upload the college CSV (maximum 2 MB). Required columns: stop_order or stop_order_shared, name or stop_name, latitude, longitude. Exactly 21 stops, starting at NIE Golden Jubilee and ending at North Campus Last Stop. Import replaces R001’s stop list; existing student pickup assignments must remain valid.',
+    return render(request, 'admin_portal/form.html', {'form': form, 'title': 'Import route CSV', 'section': 'routes', 'is_route_import': True,
+        'intro': 'Upload 2–500 ordered stops (maximum 2 MB). Columns: stop_order or stop_order_shared, name or stop_name, latitude, longitude. Imports create or update the selected route and replace its stop list. Existing student pickups must remain valid. Use a different route code to keep an existing route.',
         'back_url': reverse('admin_portal:list', args=['routes'])})
+
+
+@admin_required
+def stops_bulk(request, route_pk):
+    route = get_object_or_404(Route, pk=route_pk)
+    formset = forms.BulkStopFormSet(request.POST or None, prefix='stops')
+    error = None
+    if request.method == 'POST' and formset.is_valid():
+        rows = [{k: v for k, v in row.items() if k != 'DELETE'} for row in formset.cleaned_data if row and not row.get('DELETE')]
+        try:
+            services.append_route_stops(route, rows)
+        except (ValidationError, IntegrityError) as exc:
+            error = ' '.join(exc.messages) if isinstance(exc, ValidationError) else 'Stops conflict with existing records. Check for duplicates.'
+        else:
+            messages.success(request, f'{len(rows)} stops added to {route.route_code}.')
+            return redirect('admin_portal:detail', entity='routes', pk=route.pk)
+    return render(request, 'admin_portal/stops_bulk.html', {
+        'title': f'Add stops to {route.route_code}', 'section': 'routes', 'route': route,
+        'formset': formset, 'error': error, 'existing_count': route.route_stops.count(),
+    })
 
 
 @admin_required

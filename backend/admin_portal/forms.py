@@ -1,5 +1,6 @@
 from django import forms
 from django.urls import reverse
+from django.db.models import F
 from accounts.models import CustomUser
 from buses.models import Bus
 from routes.models import Route, BusStop
@@ -94,7 +95,9 @@ class StudentAssignmentForm(StyledForm, forms.Form):
         super().__init__(*args, **kwargs)
         self.fields['student'].queryset = Student.objects.filter(user__is_active=True).select_related('user').order_by('user__full_name')
         self.fields['student'].label_from_instance = lambda obj: f'{obj.user.full_name} · {obj.enrollment_number}'
-        self.fields['bus'].queryset = Bus.objects.filter(is_active=True, driver_assignments__is_active=True, driver_assignments__route__is_active=True).order_by('bus_number')
+        self.fields['bus'].queryset = Bus.objects.filter(is_active=True, driver_assignments__is_active=True, driver_assignments__route__is_active=True).annotate(assigned_route_code=F('driver_assignments__route__route_code')).order_by('bus_number')
+        self.fields['bus'].label_from_instance = lambda obj: f'{obj.bus_number} · {obj.assigned_route_code}'
+        self.fields['bus'].help_text = 'The bus determines the route. Choose a pickup stop from that route below.'
         bus_id = self.data.get('bus') if self.is_bound else self.initial.get('bus')
         if str(bus_id).isdigit():
             route_ids = DriverAssignment.objects.filter(bus_id=bus_id, is_active=True, route__is_active=True).values_list('route_id', flat=True)
@@ -119,7 +122,9 @@ class DriverAssignmentForm(StyledForm, forms.Form):
 
 
 class ImportForm(StyledForm, forms.Form):
-    file = forms.FileField(label='R001 route CSV', widget=forms.ClearableFileInput(attrs={'accept': '.csv,text/csv'}))
+    route_code = forms.CharField(max_length=30, required=False, help_text='Leave blank to use the CSV route ID, or enter a different code to copy its stops into that route. Existing routes with the entered code are updated.')
+    route_name = forms.CharField(max_length=150, required=False, help_text='Optional display name for the route.')
+    file = forms.FileField(label='Route stops CSV', widget=forms.ClearableFileInput(attrs={'accept': '.csv,text/csv'}))
     direction = forms.ChoiceField(choices=Route.Direction.choices, initial='TO_COLLEGE')
 
     def __init__(self, *args, **kwargs):
@@ -131,3 +136,18 @@ class ImportForm(StyledForm, forms.Form):
         if upload.size > 2 * 1024 * 1024:
             raise forms.ValidationError('CSV must be at most 2 MB.')
         return upload
+
+
+class BulkStopForm(StyledForm, forms.Form):
+    name = forms.CharField(max_length=200)
+    latitude = forms.DecimalField(max_digits=10, decimal_places=7, min_value=-90, max_value=90)
+    longitude = forms.DecimalField(max_digits=10, decimal_places=7, min_value=-180, max_value=180)
+    address = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.style()
+
+
+BulkStopFormSet = forms.formset_factory(BulkStopForm, extra=1, min_num=1,
+    validate_min=True, max_num=200, validate_max=True, absolute_max=200, can_delete=True)

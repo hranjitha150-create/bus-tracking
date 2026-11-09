@@ -16,7 +16,7 @@ from drivers.models import Driver
 from routes.models import Route, BusStop
 from assignments.models import StudentBusAssignment, DriverAssignment
 from . import services, queries
-from .uploads import import_upload
+from .uploads import import_upload, import_route_upload
 
 
 class AdminErrors:
@@ -135,12 +135,25 @@ class RouteViewSet(AdminViewSet):
     def import_csv(self, request):
         serializer = UploadSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        route = import_upload(serializer.validated_data['file'], serializer.validated_data['direction'])
-        return Response({'detail': 'R001 imported: 21 stops. Source observations remain provisional.', 'route': RouteSerializer(route).data})
+        data = serializer.validated_data
+        route = import_route_upload(data['file'], data['direction'], data.get('route_code', ''),
+            data.get('route_name', ''), default_code='R001')
+        return Response({'detail': f'{route.route_code} imported: {route.route_stops.count()} stops. Source metadata retained.', 'route': RouteSerializer(route).data})
+
+    @action(detail=True, methods=['post'], url_path='import-stops', parser_classes=[MultiPartParser, FormParser])
+    def import_stops(self, request, pk=None):
+        target = self.get_object()
+        serializer = UploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        route = import_route_upload(data['file'], data['direction'], route_name=data.get('route_name', ''), target=target)
+        return Response({'detail': f'{route.route_stops.count()} stops imported.', 'route': RouteSerializer(route).data})
 
 
 class UploadSerializer(serializers.Serializer):
     file = serializers.FileField()
+    route_code = serializers.CharField(max_length=30, required=False)
+    route_name = serializers.CharField(max_length=150, required=False)
     direction = serializers.ChoiceField(choices=Route.Direction.choices, default='TO_COLLEGE')
 
 

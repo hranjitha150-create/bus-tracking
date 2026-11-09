@@ -1,0 +1,5 @@
+<fieldset class="bulk-stop-row panel mb-3 p-3" data-stop-row {% if row.DELETE.value %}hidden{% endif %}>
+<legend class="h6">Stop details</legend>
+<div class="form-grid">{% for field in row %}{% if field.name != 'DELETE' %}<div class="form-field {% if field.name == 'address' %}full-width{% endif %}"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>{{ field }}{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>{% endif %}{% endfor %}</div>
+<div hidden>{{ row.DELETE }}</div><button type="button" class="btn btn-outline-danger mt-3" data-remove-stop>Remove this stop</button>
+</fieldset>
