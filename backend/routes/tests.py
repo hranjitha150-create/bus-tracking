@@ -31,6 +31,36 @@ class CSVFileMixin:
 
 
 class CSVValidationTests(CSVFileMixin, SimpleTestCase):
+    def shared_rows(self):
+        return [dict(route_id='R001', stop_order_shared=row['stop_order'],
+                     stop_name=row['name'], latitude=row['latitude'], longitude=row['longitude'],
+                     street='Source street', city='Mysuru', pincode='570016',
+                     maps_url='https://example.invalid/source-map', notes='Original observation')
+                for row in synthetic_rows()]
+
+    def test_shared_csv_headers_and_metadata(self):
+        rows = read_stops(self.make_csv(self.shared_rows()))
+        self.assertEqual([row['order'] for row in rows], list(range(1, 22)))
+        self.assertEqual(rows[0]['name'], 'NIE Golden Jubilee')
+        self.assertEqual(rows[-1]['name'], 'North Campus Last Stop')
+        self.assertEqual(rows[0]['metadata']['route_id'], 'R001')
+        self.assertEqual(rows[0]['metadata']['stop_order_shared'], '1')
+        self.assertEqual(rows[0]['metadata']['street'], 'Source street')
+        self.assertEqual(rows[0]['metadata']['notes'], 'Original observation')
+
+    def test_shared_sequence_rejects_ambiguous_headers(self):
+        rows = self.shared_rows()
+        for row in rows:
+            row['stop_order'] = row['stop_order_shared']
+        with self.assertRaisesMessage(CommandError, 'Required column stop_order'):
+            read_stops(self.make_csv(rows))
+
+    def test_shared_route_id_cannot_import_other_routes(self):
+        rows = self.shared_rows()
+        rows[5]['route_id'] = 'R002'
+        with self.assertRaisesMessage(CommandError, 'Only route R001 is accepted'):
+            read_stops(self.make_csv(rows))
+
     def test_valid_file_preserves_actual_values_and_metadata(self):
         rows = read_stops(self.make_csv(list(reversed(synthetic_rows()))))
         self.assertEqual(str(rows[0]['latitude']), '10.1234567')

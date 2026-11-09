@@ -1,4 +1,5 @@
 (() => {
+  const busSymbol = '<svg class="map-bus-symbol" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M5 11h14M8 19v2m8-2v2M9 6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="15" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15" r="1.2" fill="currentColor"/></svg>';
   const container = document.getElementById('fleet-map');
   if (!container) return;
   const feedback = document.getElementById('map-feedback');
@@ -46,6 +47,7 @@
     bounds.push(...stops);
   }
   function renderFleet(fleet, fit = false) {
+    const hadPositions = busMarkers.size > 0;
     updatesAvailable = true;
     lastFleet = fleet;
     const ids = new Set(fleet.filter(bus => Number.isFinite(bus.latitude) && Number.isFinite(bus.longitude)).map(bus => bus.id));
@@ -62,11 +64,14 @@
       const point = [bus.latitude, bus.longitude]; positions.push(point);
       const style = `bus-marker ${bus.gps_status} ${bus.is_simulated ? 'simulated' : ''}`;
       let marker = busMarkers.get(bus.id);
-      if (!marker) { marker = L.marker(point, {icon: L.divIcon({className: style, html: '▣', iconSize: [30, 30]})}).addTo(markers); marker.bindPopup(''); busMarkers.set(bus.id, marker); }
-      else { marker.setLatLng(point); if (marker.options.icon.options.className !== style) marker.setIcon(L.divIcon({className: style, html: '▣', iconSize: [30, 30]})); }
+      if (!marker) { marker = L.marker(point, {icon: L.divIcon({className: style, html: busSymbol, iconSize: [42, 42], iconAnchor: [21, 21]})}).addTo(markers); marker.bindPopup(''); busMarkers.set(bus.id, marker); }
+      else { marker.setLatLng(point); if (marker.options.icon.options.className !== style) marker.setIcon(L.divIcon({className: style, html: busSymbol, iconSize: [42, 42], iconAnchor: [21, 21]})); }
+      const label = document.createElement('span'); label.textContent = bus.bus_number;
+      if (marker.getTooltip()) marker.setTooltipContent(label);
+      else marker.bindTooltip(label, {permanent: true, direction: 'bottom', offset: [0, 22], className: 'bus-map-label'});
       marker.setPopupContent(popup(bus.bus_number, [bus.is_simulated ? 'SIMULATED DEVELOPMENT GPS' : labels[bus.gps_status], `Driver: ${bus.driver_name || 'Unassigned'}`, `Route: ${bus.route_code || 'Unassigned'}`, `Trip: ${bus.trip_status}`, `Next stop: ${bus.next_stop?.name || 'Unavailable'}`, `Recorded: ${when(bus.recorded_at)}`, `Received: ${when(bus.received_at)}`]));
     });
-    if (fit && (bounds.length || positions.length)) map.fitBounds([...bounds, ...positions], {padding: [35, 35], maxZoom: 15});
+    if ((fit || (!hadPositions && positions.length)) && (bounds.length || positions.length)) map.fitBounds([...bounds, ...positions], {padding: [35, 35], maxZoom: 15});
     feedback.textContent = `${positions.length} bus position${positions.length === 1 ? '' : 's'} available. ${positions.length || bounds.length ? 'Historical positions are labeled; purple markers are SIMULATED.' : 'No GPS positions or route coordinates available yet.'}`;
     inspectBus(false);
     const tbody = document.getElementById('fleet-rows');
@@ -110,7 +115,7 @@
       updatesAvailable = false;
       feedback.textContent = error.name === 'AbortError' ? 'Refresh timed out. Displayed records may be outdated. Try again.' : error.message;
       for (const [id, marker] of busMarkers) {
-        marker.setIcon(L.divIcon({className: 'bus-marker inactive', html: '▣', iconSize: [30, 30]}));
+        marker.setIcon(L.divIcon({className: 'bus-marker inactive', html: busSymbol, iconSize: [42, 42], iconAnchor: [21, 21]}));
         marker.setPopupContent(popup(lastFleet.find(bus => bus.id === id)?.bus_number || 'Bus', ['Refresh failed — last known position. Current trip, GPS and next stop could not be verified.']));
       }
       document.querySelectorAll('#fleet-rows .status-badge').forEach(badge => { badge.className = 'status-badge inactive'; badge.textContent = 'Refresh failed / last known'; });

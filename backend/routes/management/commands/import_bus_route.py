@@ -10,7 +10,7 @@ ALIASES = {
     'name': ('name', 'stop_name', 'bus_stop', 'bus_stop_name'),
     'latitude': ('latitude', 'lat'),
     'longitude': ('longitude', 'lon', 'lng', 'long'),
-    'stop_order': ('stop_order', 'stop_number', 'stop_no', 'sequence', 'order'),
+    'stop_order': ('stop_order', 'stop_order_shared', 'stop_number', 'stop_no', 'sequence', 'order'),
 }
 
 
@@ -44,8 +44,9 @@ def read_stops(path):
                         raise ValueError('Stop name must contain 1–200 characters')
                     if order < 1:
                         raise ValueError('Order must be positive')
-                    if 'route_code' in lookup and raw[lookup['route_code']].strip() != 'R001':
-                        raise ValueError('Only route R001 is accepted')
+                    for route_column in ('route_code', 'route_id'):
+                        if route_column in lookup and raw[lookup[route_column]].strip() != 'R001':
+                            raise ValueError('Only route R001 is accepted')
                 except (ValueError, InvalidOperation) as exc:
                     raise CommandError(f'Line {line}: invalid stop order, name or coordinates ({exc}).') from exc
                 rows.append({'name': values['name'], 'latitude': lat.quantize(Decimal('.0000001'), rounding=ROUND_HALF_UP),

@@ -239,6 +239,23 @@ class AdminPortalTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '21 ordered stops')
 
+    def test_shared_csv_headers_import_through_api_and_admin_form(self):
+        StudentBusAssignment.objects.update(is_active=False)
+        rows = [dict(route_id='R001', stop_order_shared=row['stop_order'], stop_name=row['name'],
+                     latitude=row['latitude'], longitude=row['longitude'], notes='Source observation')
+                for row in synthetic_rows()]
+        response = self.api.post('/api/admin/routes/import/', {'file': csv_upload(rows)}, format='multipart')
+        self.assertEqual(response.status_code, 200, response.data)
+        response = self.client.post('/portal/routes/import/', {
+            'file': csv_upload(rows), 'direction': 'FROM_COLLEGE',
+        }, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '21 ordered stops')
+        self.route.refresh_from_db()
+        self.assertEqual(self.route.direction, 'FROM_COLLEGE')
+        self.assertEqual(self.route.route_stops.count(), 21)
+        self.assertEqual(self.route.route_stops.first().stop.original_metadata['notes'], 'Source observation')
+
     def test_live_map_uses_only_recorded_positions(self):
         response = self.api.get('/api/admin/live-buses/')
         self.assertEqual(response.status_code, 200)

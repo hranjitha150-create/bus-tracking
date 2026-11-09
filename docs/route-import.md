@@ -8,7 +8,7 @@ CSV canonical columns:
 stop_order,name,latitude,longitude
 ```
 
-Exactly 21 rows, unique consecutive orders 1–21, valid decimal coordinates and nonempty stop names are required. First stop must be `NIE Golden Jubilee`; last must be `North Campus Last Stop`. Case-insensitive header aliases include stop_name, lat, lon/lng and sequence/order. Optional route_code must be R001. Extra columns are preserved as source metadata; uncertain source names remain provisional. Import rejects malformed/ambiguous headers and duplicate named coordinates before mutating the database.
+Exactly 21 rows, unique consecutive orders 1–21, valid decimal coordinates and nonempty stop names are required. First stop must be `NIE Golden Jubilee`; last must be `North Campus Last Stop`. Case-insensitive header aliases include stop_name, lat, lon/lng and sequence/order. `stop_order_shared` is also accepted for the sequence in the college's source CSV. Optional `route_code` and `route_id` columns must contain R001. Extra columns are preserved as source metadata; uncertain source names remain provisional. Import rejects malformed/ambiguous headers and duplicate named coordinates before mutating the database.
 
 Use `/portal/routes/import/` through the route import link, or from repository root:
 

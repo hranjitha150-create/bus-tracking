@@ -91,6 +91,19 @@ def main():
             page.wait_for_function("document.querySelector('#fleet-map').classList.contains('leaflet-container')")
             page.get_by_role('button', name='Refresh positions').click()
             page.wait_for_function("document.querySelector('#map-feedback').textContent.includes('Refreshed')")
+            # A first GPS fix arriving after map load must create a labeled bus.
+            fleet = page.evaluate("JSON.parse(document.querySelector('#fleet-data').textContent)")
+            fleet[0].update(latitude=10.1234567, longitude=70.07, gps_status='live')
+            live_url = page.locator('#fleet-map').get_attribute('data-live-url')
+            page.route('**' + live_url, lambda route: route.fulfill(json={'results': fleet}))
+            page.get_by_role('button', name='Refresh positions').click()
+            page.wait_for_function("document.querySelector('.bus-marker.live .map-bus-symbol') !== null")
+            assert page.locator('.bus-map-label').inner_text() == fleet[0]['bus_number']
+            page.wait_for_function("""() => {
+                const marker = document.querySelector('.bus-marker.live').getBoundingClientRect();
+                const map = document.querySelector('#fleet-map').getBoundingClientRect();
+                return marker.left >= map.left && marker.right <= map.right && marker.top >= map.top && marker.bottom <= map.bottom;
+            }""")
             page.screenshot(path=str(screenshots / 'admin-map.png'), full_page=True)
             page.set_viewport_size({'width': 390, 'height': 844})
             page.goto('http://127.0.0.1:8002/dashboard/admin/')

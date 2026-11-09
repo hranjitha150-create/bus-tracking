@@ -99,6 +99,8 @@ def main():
             assert page.locator('.student-stop-icon.pickup').count() == 1
             assert page.locator('.student-stop-icon.start').count() == 1
             assert page.locator('.student-stop-icon.destination').count() == 1
+            assert page.locator('.student-stop-label').count() == 21
+            assert 'Your pickup' in page.locator('.student-stop-label.pickup').inner_text()
             assert page.locator('.route-stop.is-pickup .stop-number').inner_text() == '7'
             assert 'NIE Golden Jubilee' in page.locator('.route-stop').first.inner_text()
             assert 'North Campus Last Stop' in page.locator('.route-stop').last.inner_text()
@@ -110,6 +112,10 @@ def main():
             db_call(lambda: assign_student(fixture.student, fixture.bus, fixture.pickup))
             page.goto(base + '/student/tracking/')
             page.wait_for_function("document.querySelectorAll('.student-bus-icon.fresh').length === 1")
+            assert page.locator('.student-bus-icon .map-bus-symbol').count() == 1
+            assert page.locator('.bus-map-label').inner_text() == fixture.bus.bus_number
+            assert page.locator('.student-stop-icon').count() == 21
+            assert page.locator('#student-stop-list .route-stop').count() == 21
             page.evaluate("window.__originalMarker = document.querySelector('.student-bus-icon'); window.__mapIdentity = document.querySelector('#student-map')._leaflet_id; window.__oldTransform = __originalMarker.style.transform")
             # No button click: wait for the configurable periodic fetch to move the marker.
             db_call(lambda: BusLocation.objects.filter(pk=location.pk).update(latitude='10.1244567', longitude='70.0800000', recorded_at=timezone.now(), received_at=timezone.now()))

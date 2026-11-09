@@ -292,7 +292,7 @@ def import_route(request):
             messages.success(request, 'R001 imported: 21 ordered stops. Observations and uncertain names remain provisional.')
             return redirect('admin_portal:detail', entity='routes', pk=route.pk)
     return render(request, 'admin_portal/form.html', {'form': form, 'title': 'Import R001 route', 'section': 'routes',
-        'intro': 'Upload the mentor’s CSV (maximum 2 MB). Required columns: stop_order, name, latitude, longitude. Exactly 21 stops, starting at NIE Golden Jubilee and ending at North Campus Last Stop. Repeated imports update R001 without duplicating identical stops.',
+        'intro': 'Upload the college CSV (maximum 2 MB). Required columns: stop_order or stop_order_shared, name or stop_name, latitude, longitude. Exactly 21 stops, starting at NIE Golden Jubilee and ending at North Campus Last Stop. Import replaces R001’s stop list; existing student pickup assignments must remain valid.',
         'back_url': reverse('admin_portal:list', args=['routes'])})
 
 
