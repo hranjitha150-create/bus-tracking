@@ -1,0 +1,9 @@
+.bus-marker,.student-bus-icon{display:grid;place-items:center;width:42px;height:42px;border:3px solid #fff;border-radius:13px;background:#087f72;color:#fff;box-shadow:0 3px 12px #153e3640;overflow:visible}
+.map-bus-symbol{display:block;width:27px;height:27px;pointer-events:none}
+.bus-marker.stale,.student-bus-icon.stale{background:#a87522}
+.bus-marker.inactive,.bus-marker.unavailable,.bus-marker.not_started,.bus-marker.completed,.student-bus-icon.completed,.student-bus-icon.offline,.student-bus-icon.error,.student-bus-icon.invalid_timestamp{background:#718079}
+.bus-marker.simulated,.student-bus-icon.simulated{background:#7957ad}
+.bus-map-label{background:#fff;border:1px solid #d5e2d9;border-radius:6px;color:#244d3b;font:600 11px/1.4 "Segoe UI",system-ui,sans-serif;padding:4px 8px;box-shadow:0 2px 7px #153e3614;min-width:42px;width:max-content;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.student-stop-label{background:#fff;border:1px solid #d5e2d9;border-radius:6px;color:#315342;font:600 11px/1.5 "Segoe UI",system-ui,sans-serif;padding:5px 8px;max-width:180px;width:max-content;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 7px #153e3614}
+.student-stop-label.pickup{color:#785514;background:#fff7df;border-color:#d8b75f}
+.leaflet-container:not(.stop-labels-visible) .student-stop-label:not(.pickup){display:none}
