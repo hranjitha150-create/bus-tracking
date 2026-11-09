@@ -4,6 +4,27 @@ No provider or domain is assumed. Choose a host that can reach Supabase and term
 
 ## Prepare configuration
 
+### Vercel hostname configuration
+
+For this project's deployment, set `DJANGO_ALLOWED_HOSTS=bus-tracking-peach-gamma.vercel.app`
+in Vercel's **Production** environment and redeploy. Use bare hostnames, without
+`https://`, paths, or a trailing slash. Updating the local `.env` does not update
+an existing Vercel deployment. A missing host produces Django's generic HTTP 400;
+the function logs identify it as `DisallowedHost` / `Invalid HTTP_HOST header`.
+
+Settings also accept exact domains supplied by `VERCEL_URL`, `VERCEL_BRANCH_URL`
+and `VERCEL_PROJECT_PRODUCTION_URL` when `VERCEL=1`. Enable access to system
+environment variables in Vercel for this automatic configuration. Custom domains
+can still be listed explicitly in `DJANGO_ALLOWED_HOSTS`. Other Vercel projects
+are not allowed; do not use `*` or `.vercel.app` as a workaround.
+
+Keep Root Directory `backend`, the Django preset, and the default build/output
+settings. Override the install command to `pip install -r requirements-production.txt`.
+Use `DJANGO_SETTINGS_MODULE=config.production` and `DJANGO_DEBUG=False`.
+This hostname fix does not replace the production file cache: Vercel deployment
+still needs a shared cache for login rate limits instead of the single-host
+filesystem configuration below. Do not use temporary storage for shared limits.
+
 Install `backend/requirements-production.txt`. Use `backend/.env.production.example` as a reference; set real values privately in the process environment or protected backend/.env. Preserve existing development credentials. Generate a unique secret, exact allowed hosts and TLS PostgreSQL URL for a restricted runtime role. Follow [Supabase setup](supabase-setup.md) for separate migration-owner credentials.
 
 Same-origin templates need no CORS entries. Only list exact HTTPS origins for a separately hosted authorized browser client. Native Android bearer requests need no CORS entry. CSRF trusted origins are for intentional cross-origin browser form use; do not add wildcard origins.

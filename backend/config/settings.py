@@ -3,6 +3,7 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
+from .hosts import deployment_hosts
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -14,7 +15,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
     raise ImproperlyConfigured('Set DJANGO_SECRET_KEY in backend/.env or the environment.')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
-ALLOWED_HOSTS = csv_env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
+ALLOWED_HOSTS = deployment_hosts(
+    csv_env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'), os.environ
+)
 DATABASE_URL = os.getenv('DATABASE_URL')
 if not DATABASE_URL or not DATABASE_URL.startswith(('postgres://', 'postgresql://')):
     raise ImproperlyConfigured('DATABASE_URL must be a PostgreSQL URL. SQLite is not supported.')
