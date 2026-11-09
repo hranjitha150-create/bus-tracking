@@ -1,0 +1,9 @@
+
+python manage.py createsuperuser
+
+admin@gmail.com 
+admin123
+
+
+chandan@gmail.com   
+user@123

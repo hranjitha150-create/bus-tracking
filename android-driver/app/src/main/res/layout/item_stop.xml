@@ -1,0 +1,4 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="@drawable/card_background" android:layout_marginBottom="10dp">
+    <TextView android:id="@+id/stopName" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="16sp" android:textColor="@color/ink" android:fontFamily="sans-serif-medium"/>
+    <TextView android:id="@+id/stopCoordinates" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:textColor="@color/muted" android:layout_marginTop="8dp"/>
+</LinearLayout>

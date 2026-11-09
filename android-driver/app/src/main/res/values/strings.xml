@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="no_route_stops">No route stops have been imported. Contact the transport office.</string>
+  <string name="stop_title">%1$d. %2$s%3$s</string>
+  <string name="app_name">Campus Transit Driver</string>
+  <string name="channel_name">Active college bus trip</string>
+  <string name="tracking_title">College bus location sharing</string>
+  <string name="stop_sharing">Stop sharing</string>
+  <string name="text_campus_transit">Campus Transit</string>
+  <string name="text_campus_transit_driver">CAMPUS TRANSIT / DRIVER</string>
+  <string name="text_your_route_nyour_college">Your route.\nYour college.</string>
+  <string name="text_sign_in_with_the_driver_account_provided_by_your_college">Sign in with the driver account provided by your college.</string>
+  <string name="text_college_email">College email</string>
+  <string name="text_password">Password</string>
+  <string name="text_sign_in">Sign in</string>
+  <string name="text_location_is_shared_only_after_you_start_or_resume_a_verified_acti">Location is shared only after you start or resume a verified active trip. No background location permission is requested.</string>
+  <string name="text_driver_dashboard">Driver dashboard</string>
+  <string name="text_checking_assignment">Checking assignment…</string>
+  <string name="text_your_assigned_college_bus">YOUR ASSIGNED COLLEGE BUS</string>
+  <string name="text_current_trip">CURRENT TRIP</string>
+  <string name="text_not_started">Not started</string>
+  <string name="text_location_sharing_is_off">Location sharing is off.</string>
+  <string name="text_start_trip_and_share_gps">Start trip and share GPS</string>
+  <string name="text_resume_location_sharing">Resume location sharing</string>
+  <string name="text_end_trip">End trip</string>
+  <string name="text_stop_sharing_only">Stop sharing only</string>
+  <string name="text_assigned_bus">Assigned bus</string>
+  <string name="text_route_and_ordered_stops">Route and ordered stops</string>
+  <string name="text_active_trip">Active trip</string>
+  <string name="text_dashboard">Dashboard</string>
+  <string name="text_refresh_assignment">Refresh assignment</string>
+  <string name="text_device_location_settings">Device location settings</string>
+  <string name="text_sign_out">Sign out</string>
+</resources>

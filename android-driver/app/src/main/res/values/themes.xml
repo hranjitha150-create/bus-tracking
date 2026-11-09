@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.CampusDriver" parent="Base.Theme.CampusDriver"/>
+    <style name="Base.Theme.CampusDriver" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/teal</item><item name="colorPrimaryVariant">@color/navy</item><item name="colorSecondary">@color/teal</item>
+        <item name="android:windowLightStatusBar">true</item><item name="android:statusBarColor">@color/surface</item><item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowBackground">@color/surface</item><item name="android:fontFamily">sans</item><item name="android:colorAccent">@color/teal</item>
+    </style>
+    <style name="CardTitle"><item name="android:textSize">13sp</item><item name="android:textColor">@color/muted</item><item name="android:fontFamily">sans-serif-medium</item></style>
+    <style name="ValueText"><item name="android:textSize">22sp</item><item name="android:textColor">@color/ink</item><item name="android:fontFamily">sans-serif-medium</item></style>
+</resources>

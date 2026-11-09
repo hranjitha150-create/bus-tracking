@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block content %}<p class="eyebrow">STUDENT</p><h1>Welcome, {{ user.full_name }}</h1>
+{% if assignment %}<h2>Your assigned bus: {{ assignment.bus.bus_number }}</h2><p>Pickup stop: {{ assignment.pickup_stop.name }}</p>{% else %}<p>No active bus assignment. Contact your college transport administrator.</p>{% endif %}
+<p>Live map and arrival estimates will be available in a later phase.</p>{% endblock %}

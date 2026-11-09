@@ -1,0 +1,1 @@
+<resources><style name="Theme.CampusDriver" parent="Base.Theme.CampusDriver"><item name="android:windowLightNavigationBar">true</item></style></resources>

@@ -1,0 +1,53 @@
+plugins { id 'com.android.application' }
+
+def apiUrl = providers.gradleProperty('DRIVER_API_URL').getOrElse('https://example.invalid/')
+def debugUrl = providers.gradleProperty('DRIVER_DEBUG_API_URL').getOrElse('http://10.0.2.2:8000/')
+def interval = providers.gradleProperty('GPS_INTERVAL_SECONDS').getOrElse('10').toInteger()
+if (interval < 5 || interval > 300) throw new GradleException('GPS_INTERVAL_SECONDS must be 5–300')
+if (!apiUrl.startsWith('https://') || !apiUrl.endsWith('/')) throw new GradleException('DRIVER_API_URL must be HTTPS and end with /')
+if (!debugUrl.endsWith('/')) throw new GradleException('DRIVER_DEBUG_API_URL must end with /')
+def quoted = { value -> '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"' }
+
+android {
+    namespace 'com.campustransit.driver'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'com.campustransit.driver'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        buildConfigField 'int', 'GPS_INTERVAL_SECONDS', interval.toString()
+    }
+    buildTypes {
+        debug { buildConfigField 'String', 'API_URL', quoted(debugUrl) }
+        integration {
+            initWith debug
+            applicationIdSuffix '.integration'
+            matchingFallbacks = ['debug']
+            buildConfigField 'String', 'API_URL', quoted('http://10.0.2.2:8005/')
+        }
+        release {
+            buildConfigField 'String', 'API_URL', quoted(apiUrl)
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets { integration { manifest.srcFile 'src/debug/AndroidManifest.xml'; res.srcDirs = ['src/debug/res'] } }
+    buildFeatures { buildConfig true; viewBinding true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    testOptions { unitTests.returnDefaultValues = true }
+    lint { abortOnError true }
+}
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.15.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.14.9'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+}
