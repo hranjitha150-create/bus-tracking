@@ -1,0 +1,69 @@
+/* Shared presentation layer. Existing portal data and map hooks stay in place. */
+:root{--ink:#183d36;--muted:#60756c;--line:#dfe8e2;--surface:#f4f7f4;--blue:#087f72;--green:#087f72;--teal:#087f72;--navy:#153e36}
+body{background:var(--surface);color:var(--ink);font-family:"Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.65}
+a{color:#08776a}
+a:hover{color:#075b51}
+[hidden]{display:none!important}
+.sidebar,.student-sidebar{width:254px;background:#153e36;color:#d7e8dd;border-right:0;padding:30px 18px;overflow-y:auto;scrollbar-width:thin}
+.brand,.student-brand{color:#fff;font-size:18px;letter-spacing:-.4px;padding:0 7px 34px}
+.brand:hover,.student-brand:hover{color:#fff}
+.brand-icon,.brand-mark{width:43px;height:45px;border-radius:12px;background:#ffffff12;border:1px solid #ffffff20;color:#b8e8ce}
+.brand small,.student-brand small{font-size:8px;letter-spacing:1.1px;color:#afcdbb}
+.nav-label,.nav-caption{font-size:10px;letter-spacing:1.7px;color:#a4bfaf;margin:12px 15px 15px}
+.sidebar nav>a,.student-sidebar nav a{color:#c0d5c7;font-size:13px;min-height:47px;border-radius:9px;padding:12px 15px;margin-bottom:6px}
+.sidebar nav>a:hover,.student-sidebar nav a:hover{background:#ffffff0d;color:#fff}
+.sidebar nav>a.selected,.student-sidebar nav a[aria-current]{background:#d4e9bc;color:#214831;box-shadow:none;font-weight:650}
+.sidebar-footer{color:#c7dccd;border-color:#ffffff20;font-size:12px;margin-top:36px}
+.sidebar-footer small{color:#a2bda9;font-size:10px}
+.sidebar-note{background:#ffffff08;border-color:#ffffff1c;color:#d8e9dd;margin-top:36px;padding:17px}
+.sidebar-note>span{font-size:12px}.sidebar-note p,.sidebar-note small{font-size:11px;color:#afc9b7}
+.workspace,.student-workspace{margin-left:254px;min-width:0}
+.topbar,.student-topbar{height:80px;padding:0 36px;background:#ffffffeb;border-color:var(--line);gap:16px}
+.breadcrumb-label{font-size:13px;color:#60756c}.breadcrumb-label>span{color:#93a59b}
+.portal-label{font-size:10px;color:#567366;letter-spacing:1.7px}
+.avatar{width:38px;height:38px;border-radius:12px;background:#e4efd9;color:#3f6646;font-size:15px}
+.account-name,.student-account summary{font-size:13px}.account-name small,.student-account summary small{font-size:11px;color:#637b6b}
+.account-menu>div,.student-account>div{border-radius:12px;box-shadow:0 12px 32px #153e3614;min-width:210px}
+.student-account>div a,.student-account button{font-size:14px;min-height:44px;border-radius:6px}
+.student-account>div a:hover,.student-account button:hover{background:#f0f6ef}
+main{max-width:1600px;padding:36px 36px 24px}
+.page-heading,.student-heading{margin-bottom:28px;gap:24px}
+.eyebrow{color:#547968;font-size:10px;letter-spacing:1.6px;margin-bottom:10px}
+h1{font-size:32px;line-height:1.2;font-weight:650;letter-spacing:-1.2px}
+h2{font-size:17px;font-weight:650;line-height:1.5}
+.page-subtitle,.heading-copy{font-size:14px;line-height:1.8;color:#61796b}
+.btn{min-height:43px;font-size:13px;padding:10px 17px;border-radius:8px;font-weight:600}
+.btn-primary{--bs-btn-bg:#087f72;--bs-btn-border-color:#087f72;--bs-btn-hover-bg:#06675c;--bs-btn-hover-border-color:#06675c;--bs-btn-active-bg:#065d53;--bs-btn-active-border-color:#065d53;background:#087f72;border-color:#087f72;color:#fff;box-shadow:none}
+.btn-primary:hover,.btn-primary:focus-visible{background:#06675c;border-color:#06675c;color:#fff}
+.btn-outline-secondary{color:#426253;border-color:#cedbd1;background:white}
+.btn-outline-secondary:hover{background:#eaf2e8;border-color:#a4bca9;color:#224832}
+.panel,.student-panel,.stat-card,.journey-stat,.empty-assignment{border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 14px #153e3603}
+.stats-grid{gap:18px}.stat-card{padding:24px}.stat-label{font-size:13px;color:#5c7467}.stat-card strong{font-size:38px;letter-spacing:-1.5px;margin:8px 0 14px}.stat-card small{font-size:11px;color:#647b6e}.stat-icon{width:42px;height:42px;border-radius:12px}
+.blue{background:#e7f0fa;color:#427198}.purple{background:#f0ebf7;color:#7b5fa1}.teal{background:#e2f3e9;color:#287d5b}.amber{background:#fcf1db;color:#94712b}
+.trip-strip{padding:15px 20px;background:#eaf1e8;border:1px solid #dce7d9;border-radius:10px;font-size:12px;margin:20px 0 26px;gap:28px;flex-wrap:wrap;color:#536c5c}
+.panel-heading,.panel-title{padding:23px 24px;border-color:var(--line)}
+.panel-heading p,.panel-heading a{font-size:12px;color:#597767}.panel-title .eyebrow{font-size:9px}
+.table{font-size:13px}.table th{font-size:10px;letter-spacing:.8px;color:#577563;background:#f4f7f2;padding:15px 22px}.table td{padding:19px 22px;color:#496556;vertical-align:middle}.table tbody tr:hover{background:#f8faf6}.record-link{color:#234f3f}.cell-note{font-size:11px;color:#667e70}
+.status-badge,.gps-pill{font-size:11px;padding:5px 9px;border-radius:6px;line-height:1.5}.status-badge.live,.gps-pill.fresh{color:#206b46;background:#e3f2e6}.gps-pill.stale,.gps-pill.invalid_timestamp{color:#87611f;background:#fff2d7}.gps-pill.offline,.gps-pill.error{color:#994b34;background:#fff0e8}
+.activity-list{padding:12px 24px}.activity{padding:16px 0}.activity p{font-size:13px;color:#3c5c4c}.activity small{font-size:11px;color:#647d6c}.activity-dot{background:#7ba98b;box-shadow:0 0 0 4px #edf5ec}
+.subtle-tag,.subtle-label{font-size:10px;color:#597764;background:#f1f6ed;border-color:#dfe9db}
+.quick-links{background:#e9f0e2;border-color:#dce7d4;border-radius:14px;padding:24px;gap:16px}.quick-links h2{font-size:15px}.quick-links p{font-size:12px;color:#617a65}.quick-links>a{font-size:12px;min-height:48px;border-color:#d7e2cf;border-radius:8px;color:#3d6549}
+.filter-bar{padding:20px 24px;gap:12px}.form-control,.form-select{font-size:14px;min-height:46px;border-radius:8px;border-color:#cbd9cf;color:#254d3b}.form-control:focus,.form-select:focus{border-color:#398c72;box-shadow:0 0 0 4px #087f7212}.form-label{font-size:13px;color:#325a45}.form-text,.helptext{font-size:12px;color:#61786a}
+.details-grid dt{font-size:12px;color:#607568}.details-grid dd{font-size:14px;color:#284d3b}.form-footer>span{font-size:12px;color:#637c6a}
+.empty-state h3{font-size:16px}.empty-state p{font-size:13px;color:#637c6b}.gps-warning{border-radius:10px}
+.commute-hero{background:#153e36;border-radius:17px;border:1px solid #214d40;box-shadow:none;grid-template-columns:minmax(0,1fr) 280px}
+.hero-main{padding:29px 30px}.hero-tag{font-size:10px;color:#b8d7c3}.hero-enrollment{font-size:12px;color:#b5cebd}.hero-bus{margin:26px 0}.hero-bus h2{font-size:36px;letter-spacing:-1px}.hero-bus p{font-size:12px;color:#bad1c0}.hero-route{font-size:12px;color:#d3e7d7;border-radius:6px}.bus-glyph{background:#ffffff0b;color:#c9e4c9;border-radius:13px}
+.hero-journey small{font-size:10px;color:#b0ccb9}.hero-journey strong{font-size:14px;line-height:1.8}.hero-link{font-size:13px;color:#c6e3bf;padding-top:18px;margin-top:23px}.hero-eta{background:#ffffff06;padding:26px 24px}.hero-eta>p{font-size:10px;color:#b8d1bd}.hero-eta>strong{font-size:30px;color:#e5f1dc}.hero-eta>span{font-size:12px;color:#c0d6c5}.hero-eta>small{font-size:11px;color:#b1cbb8}
+.journey-stats{gap:18px;margin:23px 0}.journey-stat{padding:23px;gap:14px}.stat-symbol{width:40px;height:42px;border-radius:11px}.journey-stat p{font-size:10px;color:#5c7965;letter-spacing:.8px}.journey-stat h2{font-size:15px;line-height:1.6}.journey-stat a,.stat-note{font-size:12px;color:#5a7863}
+.overview-trip{padding:30px}.overview-trip h3{font-size:17px}.overview-trip p{font-size:13px;color:#627d68;max-width:390px}.summary-label{font-size:12px;color:#627d68}.route-summary strong{font-size:32px}.panel-copy{font-size:13px;color:#627d68}.panel-bottom-link{font-size:13px;color:#386c50;padding:18px 24px}.overview-trip .trip-illustration{margin-bottom:24px}
+.record-grid{gap:28px;padding:27px}.record-grid dt{font-size:12px;color:#607c69}.record-grid dd{font-size:15px;color:#244c39}.record-grid .full-width{min-width:0}.profile-panel .panel-title p,.profile-help p{font-size:13px;color:#5e7b67}.profile-avatar{border-radius:14px}
+.pickup-card{padding:24px}.pickup-card h2{font-size:18px}.pickup-card>p:not(.eyebrow),.pickup-eta>span{font-size:13px;color:#657d69}.pickup-coordinates small{font-size:10px;color:#607d67}.pickup-coordinates span{font-size:13px;color:#466c52}.pickup-eta>p{font-size:12px;color:#687e6a}
+.live-card h2{font-size:16px}.live-card dt,.live-card dd{font-size:12px;color:#516e5a}.live-card dd{max-width:160px}.update-note{font-size:11px;color:#647d69}.tracking-layout{grid-template-columns:minmax(0,1fr) 310px;gap:22px}
+.route-stop h3{font-size:14px}.route-stop p{font-size:12px;color:#627b68}.route-stop small{font-size:11px;color:#627b68}.stop-endpoint{font-size:9px;color:#5b7861}.pickup-label{font-size:9px;color:#81611e}.stop-number{color:#59765f}.route-stop.is-pickup{background:#fcf5e5}.empty-assignment>p:not(.eyebrow){color:#5d7864}.office-note{font-size:12px;color:#617c67}
+.map-legend{font-size:11px;color:#566f5c}.geometry-caption,.map-feedback{font-size:11px;line-height:1.8}.map-feedback{color:#5c7762}.map-empty{font-size:14px;color:#526e59;background:#fffffff5}.page-footer,.student-footer{font-size:11px;color:#617869;border-color:#dce6dd;margin-top:34px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #24977b;outline-offset:3px}
+@media(min-width:1600px){main{padding:40px 46px 24px}}
+@media(max-width:1200px){main{padding:28px 24px}.topbar,.student-topbar{padding:0 24px}.stats-grid{gap:12px}.stat-card{padding:20px}.stat-card small{font-size:10px}.commute-hero{grid-template-columns:minmax(0,1fr) 230px}.tracking-layout{grid-template-columns:minmax(0,1fr) 270px}.journey-stat{padding:18px 14px}.journey-stat h2{font-size:14px}.quick-links{grid-template-columns:1fr 1fr}}
+@media(max-width:1000px){.sidebar,.student-sidebar{width:254px;transform:translateX(-100%)}.workspace,.student-workspace{margin-left:0}.sidebar.open,.student-sidebar.open{transform:translateX(0);box-shadow:15px 0 50px #103a3433}.menu-button,.menu-toggle{display:block}.account-name,.student-account summary{font-size:12px}}
+@media(max-width:700px){main{padding:24px 16px}.topbar,.student-topbar{height:70px;padding:0 16px}.page-heading,.student-heading{align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}h1{font-size:27px}.page-subtitle,.heading-copy{font-size:13px}.eyebrow{font-size:9px}.breadcrumb-label{font-size:11px}.portal-label{font-size:9px}.account-name{display:none}.student-account summary>span:nth-child(2){max-width:125px;overflow-wrap:anywhere}.btn{font-size:12px;min-height:44px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.stat-card{padding:18px 15px}.stat-label{font-size:12px;padding-right:25px}.stat-card strong{font-size:31px}.stat-card small{font-size:10px}.stat-icon{width:30px;height:32px;font-size:18px;right:12px;top:15px}.trip-strip{gap:12px 20px;padding:14px;font-size:11px}.dashboard-grid,.student-two-column{grid-template-columns:1fr}.panel-heading,.panel-title{padding:19px}.panel-heading h2,.panel-title h2{font-size:16px}.panel-heading p,.panel-heading a{font-size:11px}.panel-heading{flex-wrap:wrap}.table th,.table td{padding:14px 16px}.table{font-size:12px}.filter-bar{padding:16px;flex-wrap:wrap}.quick-links{grid-template-columns:1fr;padding:20px}.quick-links>a{min-height:46px}.commute-hero{grid-template-columns:1fr}.hero-main{padding:24px}.hero-bus h2{font-size:32px}.hero-journey strong{font-size:13px}.hero-journey small{font-size:9px}.hero-eta{padding:20px 24px;text-align:left}.hero-eta>p{font-size:9px}.hero-eta>strong{font-size:26px}.hero-eta>span{font-size:12px}.hero-link{font-size:12px}.journey-stats{grid-template-columns:1fr;gap:12px;margin:18px 0}.journey-stat{padding:18px;align-items:center}.journey-stat p{font-size:10px}.journey-stat h2{font-size:15px;max-width:calc(100% - 100px)}.journey-stat a,.journey-stat .stat-note{font-size:11px}.journey-stat .gps-pill{font-size:9px;max-width:100px}.tracking-layout{grid-template-columns:1fr}.tracking-side{grid-template-columns:1fr}.record-grid{grid-template-columns:1fr 1fr;padding:22px;gap:24px}.record-grid dt{font-size:12px}.record-grid dd{font-size:14px}.profile-panel .record-grid{grid-template-columns:1fr}.route-stop h3{font-size:14px}.route-stop p{font-size:12px}.route-stop small{font-size:11px}.stop-endpoint{font-size:8px}.pickup-label{font-size:8px}.map-legend,.geometry-caption,.map-feedback{font-size:10px}.live-card dt,.live-card dd{font-size:12px}.update-note{font-size:11px}.student-footer,.page-footer{font-size:10px;gap:12px;flex-wrap:wrap}.student-footer>span:last-child{font-size:10px}.form-control,.form-select{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}

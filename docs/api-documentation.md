@@ -62,3 +62,22 @@ Speed input is **m/s**, accuracy/distances **metres**, display speed **km/h**, E
 GPS accepted=201, identical retry=200, invalid=400, unauthorized trip=404/403, closed/conflicting/out-of-order=409. Older fixes never overwrite newer ones. Authentication failures are 401 for bearer requests; session/role denials may be 403.
 
 Legacy `/api/buses/` and `/api/trips/` retain role-scoped querysets. New Android code uses dedicated driver APIs. `/api/development/trips/start/` and `/api/development/trips/{id}/location/` are gated development simulation endpoints, always disabled in production.
+# Route location suggestions
+
+`GET /api/admin/places/?q=Bengaluru` requires an active administrator account
+(the admin portal's session or an existing bearer token). It returns
+`{"results": ["place, city, state, country"]}` with at most six place names.
+Queries shorter than three characters return an empty list; queries longer
+than 200 characters return HTTP 400. Empty full-address results trigger one
+broader search using the last locality/city/region components, without a postal
+code. Responses include `broadened: true` when these broader results are shown;
+they are not exact building matches. Provider errors/timeouts return HTTP 503
+with an empty list and a manual-entry message. No route or stop is written by
+this read-only endpoint.
+
+The route form waits for an 800 ms pause in typing and caches up to 50 searches
+in the current page. Suggestions use [Photon's public OpenStreetMap geocoder](https://github.com/komoot/photon),
+which allows reasonable use but provides no availability guarantee. For larger
+deployments, replace the public demo service with a managed or self-hosted
+geocoder. Users can always enter a location manually. Selected names do not
+generate route geometry or create ordered stops.

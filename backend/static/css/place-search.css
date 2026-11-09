@@ -1,0 +1,9 @@
+.place-search-wrap{position:relative}
+.place-suggestions{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:1050;list-style:none;margin:0;padding:5px;background:white;border:1px solid #cbd9cf;border-radius:9px;box-shadow:0 10px 28px #153e361c;max-height:260px;overflow-y:auto}
+.place-suggestions[hidden]{display:none}
+.place-suggestions li{padding:11px 12px;font-size:13px;line-height:1.6;color:#254d3b;cursor:pointer;border-radius:5px;overflow-wrap:anywhere}
+.place-suggestions li:hover,.place-suggestions li[aria-selected=true]{background:#e8f3e8;color:#134b37}
+.place-search-status{font-size:11px;line-height:1.6;color:#61786a;margin:6px 0 0}
+.place-search-status:empty{display:none}
+.form-panel{overflow:visible}
+@media(max-width:700px){.place-suggestions li{font-size:14px;padding:12px}.place-search-status{font-size:12px}}

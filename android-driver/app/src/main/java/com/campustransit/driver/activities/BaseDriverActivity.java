@@ -30,7 +30,8 @@ public abstract class BaseDriverActivity extends AppCompatActivity {
     private TokenStore tokens;
     private TripState state;
     private DriverApi api;
-    private boolean visible, busy;
+    private boolean visible, busy, startupLocationChecked;
+    private static final int STARTUP_LOCATION_PERMISSION = 103;
     private Call<Assignment> fetch;
     private final Handler timer = new Handler(Looper.getMainLooper());
     private final Runnable tick = new Runnable() { @Override public void run() { if (visible) { text(R.id.gpsStatus, gpsLabel()); buttons(); timer.postDelayed(this, 2000); } } };
@@ -39,6 +40,7 @@ public abstract class BaseDriverActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle saved) {
         super.onCreate(saved); setContentView(layout()); LoginActivity.applyInsets(this);
         tokens = new TokenStore(this); state = new TripState(this); api = ApiClient.get(this);
+        startupLocationChecked = saved != null && saved.getBoolean("startup_location_checked", false);
         text(R.id.screenTitle, title());
         text(R.id.intervalInfo, "Target GPS interval: " + BuildConfig.GPS_INTERVAL_SECONDS + " seconds. Android and satellite availability can delay updates.");
         findViewById(R.id.refresh).setOnClickListener(view -> refresh());
@@ -57,7 +59,32 @@ public abstract class BaseDriverActivity extends AppCompatActivity {
         findViewById(R.id.dashboard).setVisibility(this instanceof DashboardActivity ? View.GONE : View.VISIBLE);
         buttons();
     }
-    @Override protected void onResume() { super.onResume(); visible = true; if (tokens.token().isEmpty()) { expired(); return; } refresh(); timer.post(tick); }
+    @Override protected void onResume() {
+        super.onResume(); visible = true;
+        if (tokens.token().isEmpty()) { expired(); return; }
+        refresh(); timer.post(tick);
+        if (this instanceof DashboardActivity && !startupLocationChecked) {
+            startupLocationChecked = true;
+            prepareLocationAtStartup();
+        }
+    }
+    @Override protected void onSaveInstanceState(@NonNull Bundle saved) {
+        saved.putBoolean("startup_location_checked", startupLocationChecked);
+        super.onSaveInstanceState(saved);
+    }
+    private void prepareLocationAtStartup() {
+        if (!Permissions.location(this)) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, STARTUP_LOCATION_PERMISSION);
+            return;
+        }
+        LocationManager manager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (manager == null || !manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            new AlertDialog.Builder(this).setTitle("Enable phone GPS")
+                .setMessage("Turn on device location so your phone can track the bus after you tap Start trip or Resume sharing.")
+                .setNegativeButton("Not now", null)
+                .setPositiveButton("Location settings", (dialog, which) -> startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))).show();
+        }
+    }
     @Override protected void onPause() { visible = false; timer.removeCallbacks(tick); if (fetch != null) fetch.cancel(); super.onPause(); }
     private void text(int id, String text) { ((TextView) findViewById(id)).setText(text == null ? "Not available" : text); }
     private void message(String text) { text(R.id.message, text); }
@@ -164,6 +191,13 @@ public abstract class BaseDriverActivity extends AppCompatActivity {
     }
     @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == STARTUP_LOCATION_PERMISSION) {
+            if (!isFinishing() && !isDestroyed()) {
+                if (Permissions.location(this)) prepareLocationAtStartup();
+                else message("Precise location is needed to track the bus. Grant it when you tap Start trip. Sharing is off.");
+            }
+            return;
+        }
         if (requestCode != 101 && requestCode != 102) return;
         if ((requestCode == 101 && Permissions.location(this)) || (requestCode == 102 && Permissions.notifications(this))) permissionThenTrip();
         else new AlertDialog.Builder(this).setTitle("Permission needed for a visible trip")

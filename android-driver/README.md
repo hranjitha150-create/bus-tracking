@@ -17,7 +17,18 @@ $env:ANDROID_HOME = 'C:\path\to\Android\Sdk'
 
 On macOS/Linux run `chmod +x gradlew` then `./gradlew ...`. The installable debug APK is `app/build/outputs/apk/debug/app-debug.apk`. Release builds produce `app/build/outputs/apk/release/app-release-unsigned.apk`; configure your own release signing before distribution.
 
-The debug app defaults to `http://10.0.2.2:8000/`, the emulator's address for your host computer. Add `10.0.2.2` to development `DJANGO_ALLOWED_HOSTS`, use `DJANGO_DEBUG=True` and start the backend from the repository root:
+The checked-in `gradle.properties` configures both debug and release builds to use
+`https://bus-tracking-peach-gamma.vercel.app/`. Physical phones can reach this
+backend over Wi-Fi or mobile data without a USB connection or local Django server.
+Rebuild and reinstall the APK after changing the URL; it is embedded at build time.
+
+For local emulator development, override the debug URL when building:
+
+```powershell
+.\gradlew.bat assembleDebug -PDRIVER_DEBUG_API_URL=http://10.0.2.2:8000/
+```
+
+`10.0.2.2` is the emulator's address for your host computer. Add `10.0.2.2` to development `DJANGO_ALLOWED_HOSTS`, use `DJANGO_DEBUG=True` and start the backend from the repository root:
 
 ```powershell
 .\.venv\Scripts\python.exe backend\manage.py runserver
@@ -39,12 +50,12 @@ Debug HTTP is allowed only for `10.0.2.2`, `127.0.0.1` and `localhost`. Use an H
 .\gradlew.bat assembleRelease -PDRIVER_API_URL=https://transport.your-college.example/
 ```
 
-The release default `https://example.invalid/` is an intentional placeholder; set the real URL before distributing. No TLS verification bypass is included. Native bearer requests do not require browser CORS/CSRF origin settings.
+The release URL is configured in `gradle.properties`; `https://example.invalid/` is only the fallback if that property is removed. No TLS verification bypass is included. Native bearer requests do not require browser CORS/CSRF origin settings.
 
 ## Screens and lifecycle
 
 - **Login:** college email/password; password input is cleared on submission and never persisted. Bearer token/expiry are AES-256-GCM encrypted with a Keystore key. Backup and device transfer of session data are disabled.
-- **Dashboard:** authenticated driver's name, assigned bus, route start/destination/direction, current/latest trip and GPS status. Missing assignment gives a clear message.
+- **Dashboard:** authenticated driver's name, assigned bus, route start/destination/direction, current/latest trip and GPS status. On opening the signed-in dashboard, the app requests precise foreground location permission and prompts to enable phone GPS if disabled. Denial leaves the app usable; Start trip can request permission again. Startup does not access GPS coordinates, start a trip or transmit location. Missing assignment gives a clear message.
 - **Assigned Bus:** registration, capacity, description and route. **Route Details:** actual stored stops in order, coordinates and endpoint labels; missing stops display an empty state.
 - **Start trip:** obtain precise foreground location and notification permissions, check GPS is enabled, then create/activate the assignment-derived trip on Django. Only a confirmed server trip can start local GPS sharing. The service verifies the active trip again before requesting location.
 - **Active Trip:** current trip, upload status, Stop sharing only, Resume sharing and End trip. The persistent notification also offers Stop sharing.

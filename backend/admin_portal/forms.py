@@ -1,4 +1,5 @@
 from django import forms
+from django.urls import reverse
 from accounts.models import CustomUser
 from buses.models import Bus
 from routes.models import Route, BusStop
@@ -59,6 +60,12 @@ class RouteForm(StyledForm, forms.ModelForm):
         if self.instance.pk:
             self.fields['route_code'].disabled = True
         self.style()
+        for name in ('start_location', 'destination'):
+            self.fields[name].widget.attrs.update({
+                'data-place-search': 'true', 'data-place-url': reverse('admin-place-search'),
+                'autocomplete': 'off', 'placeholder': 'Search a town, area or landmark',
+            })
+            self.fields[name].help_text = 'Type at least 3 characters and choose a place, or enter a location manually.'
 
     def clean_geometry(self):
         return self.cleaned_data.get('geometry') or {}

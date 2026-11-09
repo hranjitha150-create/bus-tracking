@@ -6,6 +6,7 @@ from tracking.api import TripViewSet
 from admin_portal import api as admin_api
 from students import api as student_api
 from drivers import api as driver_api
+from admin_portal.places import PlaceSearchAPI
 
 admin_router = DefaultRouter()
 admin_router.register('buses', admin_api.BusViewSet, basename='admin-bus')
@@ -43,6 +44,7 @@ urlpatterns = [
     path('api/admin/assignments/<str:kind>/<int:pk>/end/', admin_api.EndAssignmentAPI.as_view()),
     path('api/admin/live-buses/', admin_api.LiveBusesAPI.as_view()),
     path('api/admin/pickup-stops/', admin_api.PickupStopsAPI.as_view()),
+    path('api/admin/places/', PlaceSearchAPI.as_view(), name='admin-place-search'),
     path('api/admin/', include(admin_router.urls)),
     path('api/', include(router.urls)),
 ]

@@ -1,4 +1,25 @@
-{% extends 'base.html' %}
-{% block title %}Sign in · College Bus Tracking{% endblock %}
-{% block content %}<p class="eyebrow">COLLEGE TRANSPORT</p><h1>Sign in</h1><p>Use the account provided by your college.</p>
-<form method="post">{% csrf_token %}{{ form.as_p }}<input type="hidden" name="next" value="{{ next }}"><button type="submit">Sign in</button></form>{% endblock %}
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}Sign in · Campus Transit{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'css/login.css' %}">{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<section class="auth-story" aria-labelledby="welcome-title">
+  <a class="auth-brand" href="{% url 'login' %}"><span class="auth-brand-icon" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M5 11h14M8 19v2m8-2v2M9 6h6" stroke="currentColor" stroke-width="1.7"/><circle cx="8.5" cy="15" r="1" fill="currentColor"/><circle cx="15.5" cy="15" r="1" fill="currentColor"/></svg></span>Campus Transit</a>
+  <div class="auth-story-content"><p class="auth-kicker">A BETTER WAY TO CAMPUS</p><h1 id="welcome-title">Your campus. <br>Your commute. <br><span>Connected.</span></h1><p class="auth-intro">One place for your college transport. From the first pickup to the last stop.</p>
+    <div class="route-art" aria-hidden="true"><div class="route-art-top"><span>HOME TO CAMPUS</span><span class="route-art-tag">YOUR JOURNEY</span></div><div class="route-art-line"><i></i><span></span><b><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="16" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M5 11h14M8 19v2m8-2v2M9 6h6" stroke="currentColor" stroke-width="1.7"/><circle cx="8.5" cy="15" r="1" fill="currentColor"/><circle cx="15.5" cy="15" r="1" fill="currentColor"/></svg></b><span></span><i></i></div><div class="route-art-labels"><span>Your pickup</span><span>Your college</span></div></div>
+  </div><p class="auth-story-footer">A smoother journey starts here.</p>
+</section>
+<section class="auth-panel" aria-labelledby="signin-title"><div class="auth-form-wrap">
+  <p class="eyebrow">COLLEGE TRANSPORT PORTAL</p><h2 id="signin-title">Welcome back</h2><p class="auth-description">Sign in to manage your fleet or plan your next ride.</p>
+  <div class="auth-roles"><span>For administrators</span><span>For students</span></div>
+  <form method="post" class="auth-form">{% csrf_token %}
+    {% if form.non_field_errors %}<div class="auth-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}<div class="auth-field"><label for="{{ field.id_for_label }}">{% if field.name == 'username' %}College email{% else %}{{ field.label }}{% endif %}</label><div class="auth-input-wrap">{{ field }}{% if field.name == 'password' %}<button type="button" class="password-toggle" aria-controls="{{ field.id_for_label }}" aria-label="Show password" aria-pressed="false" hidden>Show</button>{% endif %}</div>{% if field.errors %}<div class="auth-field-error" role="alert">{{ field.errors }}</div>{% endif %}{% if field.help_text %}<p class="auth-help">{{ field.help_text }}</p>{% endif %}</div>{% endfor %}
+    <input type="hidden" name="next" value="{{ next }}"><button type="submit" class="auth-submit">Sign in <span aria-hidden="true">→</span></button>
+  </form>
+  <div class="auth-support"><span class="auth-support-icon" aria-hidden="true">?</span><div><strong>Need help signing in?</strong><p>Use the account provided by your college. Contact your transport office for access or password assistance.</p></div></div>
+  <p class="auth-driver-note">Driving today? Sign in through the Campus Transit Driver app.</p>
+</div><footer class="auth-footer"><span>Campus Transit</span><span>Your college. Your journey.</span></footer></section>
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/login.js' %}" defer></script>{% endblock %}
