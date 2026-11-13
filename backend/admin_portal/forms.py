@@ -54,7 +54,7 @@ class RouteForm(StyledForm, forms.ModelForm):
         model = Route
         fields = ['route_code', 'route_name', 'start_location', 'destination', 'direction', 'is_active', 'geometry']
         widgets = {'geometry': forms.Textarea(attrs={'rows': 3})}
-        help_texts = {'geometry': 'Optional authoritative GeoJSON LineString, using [longitude, latitude]. Leave {} if unavailable.'}
+        help_texts = {'geometry': 'Authoritative road GeoJSON LineString, using [longitude, latitude]. Required for ETA and stop distances. With {}, only GPS position tracking and approximate stop connections are available.'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

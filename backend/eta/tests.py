@@ -190,6 +190,7 @@ class LiveIntegrationTests(TestCase):
         self.gps(pk, 0, 77.001)
         data = self.student_data()
         self.assertEqual(data['eta']['reason'], 'geometry_unavailable')
+        self.assertIn('saved road route', data['eta']['message'])
         self.assertTrue(data['route']['is_approximate'])
         Route.objects.filter(pk=self.route.pk).update(geometry={'type': 'Polygon'})
         self.gps(pk, 10, 77.001)
@@ -276,6 +277,26 @@ class LiveIntegrationTests(TestCase):
             self.assertEqual(http.call_count, 1)
         self.route.refresh_from_db()
         self.assertIsNotNone(plan_for(self.route)[0])
+
+    def test_generating_missing_geometry_enables_next_trip_distances_and_eta(self):
+        import json
+        from routes.models import Route
+
+        geometry = self.route.geometry
+        Route.objects.filter(pk=self.route.pk).update(geometry={})
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = json.dumps(
+            {'code': 'Ok', 'routes': [{'geometry': geometry}]}).encode()
+        with patch('routes.management.commands.generate_route_geometry.urlopen', return_value=response), patch('time.sleep'):
+            call_command('generate_route_geometry', 'R001', stdout=io.StringIO())
+        pk = self.start()
+        self.assertEqual(self.gps(pk, 0, 77.001).status_code, 201)
+        data = self.student_data()
+        self.assertEqual(data['gps']['status'], 'fresh')
+        self.assertEqual(data['progress']['status'], 'available')
+        self.assertIsNotNone(data['progress']['distance_to_next_stop_m'])
+        self.assertGreater(data['progress']['distance_to_pickup_m'], 0)
+        self.assertEqual(data['eta']['status'], 'available')
 
     def test_geometry_failure_preserves_stored_path_and_active_trip_protects_it(self):
         with patch('routes.management.commands.generate_route_geometry.urlopen', side_effect=URLError('test offline')), patch('time.sleep'):

@@ -27,6 +27,8 @@ def estimate_pickup_eta(*, bus, trip, pickup_stop, location, now, context=None):
     else:
         plan_state, progress, info = context
     if info['status'] != 'available':
+        if info['reason'] in ('geometry_unavailable', 'geometry_invalid'):
+            return unavailable(info['reason'], 'ETA and stop distances require a saved road route. Contact the transport office to configure this route; GPS position tracking can still work.')
         return unavailable(info['reason'], 'ETA unavailable: ' + str(info['reason']).replace('_', ' ') + '.')
     if not progress or progress.recorded_at != location.recorded_at:
         return unavailable('progress_pending', 'Waiting for this GPS sample to be matched to the route.')

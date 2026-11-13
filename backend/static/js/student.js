@@ -49,7 +49,15 @@
     bind('next-stop', reliable ? progress.next_stop?.name || 'Route destination reached' : 'Unavailable');
     bind('next-distance', reliable ? distanceLabel(progress.distance_to_next_stop_m) : 'Unavailable');
     bind('pickup-distance', reliable ? progress.pickup_passed ? 'Your stop has been passed' : distanceLabel(progress.distance_to_pickup_m) : 'Unavailable');
-    bind('route-progress', reliable ? `${progress.percent}% of route` : (connection !== 'online' ? 'Connection unavailable' : gps.status !== 'fresh' ? gps.label : (progress.reason || 'Awaiting route match').replaceAll('_', ' ')));
+    const progressReasons = {
+      geometry_unavailable: 'Road route needs configuration',
+      geometry_invalid: 'Road route needs correction',
+      geometry_changed: 'Road route changed; start a new trip',
+      off_route: 'Bus is outside the configured road route',
+      no_progress: 'Waiting for a route-matched GPS update',
+      progress_pending: 'Matching GPS position to the road route'
+    };
+    bind('route-progress', reliable ? `${progress.percent}% of route` : (connection !== 'online' ? 'Connection unavailable' : gps.status !== 'fresh' ? gps.label : progressReasons[progress.reason] || (progress.reason || 'Awaiting route match').replaceAll('_', ' ')));
     document.dispatchEvent(new CustomEvent('student:freshness', {detail: {gps, connection}}));
   }
   function renderStops() {
